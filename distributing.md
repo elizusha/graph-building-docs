@@ -31,9 +31,71 @@ After that the result graph is running inside a Docker container as before savin
 
 ## Mounting another web UI
 
-At all previous steps blazegraph server and web ui were used. However sometimes another web UI have to be integrated with the same graph data.
+At all previous steps blazegraph server and web UI were used. However sometimes another web UI have to be integrated with the same graph data.
 
 Microservice architecture consisting of three containers allows to deploy blazegraph and generic graph UI ([Yasgui](https://triply.cc/docs/yasgui-api)) on a single machine, locally or in the cloud.
 
-* [Tutorial](https://docs.google.com/document/d/1fsF2bX8Mn2o1EkbGxAW--1ojwZC-RYnZ_65Rv_pZi2o/edit)
-    //TODO: write tutorial here
+### Using graph admin
+
+TBD
+
+### Manualy
+
+1. Run following command with external endpoint that will be used to open yasgui in browser
+
+    ```
+    EXTERNAL_ENDPOINT=127.0.0.1:8888
+    ```
+
+1. Run blazegraph docker:
+
+    ```
+    BLAZEGRAPH_CONTAINER_ID=`docker run -d lyrasis/blazegraph:2.1.5`
+    ```
+
+1. Print blazegraph container ip:
+
+    ```
+    docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $BLAZEGRAPH_CONTAINER_ID
+    ```
+
+1. Run yasgui docker:
+
+    ```
+    YASGUI_CONTAINER_ID=`docker run -d --env DEFAULT_SPARQL_ENDPOINT=http://${EXTERNAL_ENDPOINT}/blazegraph/bigdata/sparql erikap/yasgui`
+    ```
+1. Print yasgui container ip:
+
+    ```
+    docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $YASGUI_CONTAINER_ID
+    ```
+1. Create local file default.conf and replace blazegraph_ip and yasgui_ip with ip addresses from previous step:
+
+    ```
+    server {
+        listen       80;
+        listen  [::]:80;
+        server_name  localhost;
+
+        location /blazegraph/ {
+            proxy_pass http://blazegraph_ip:8080/;
+        }
+
+        location / {
+            proxy_pass http://yasgui_ip/;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+    ```
+
+1. Run nginx (change port 8888 to match EXTERNAL_ENDPOINT port)
+
+    ```
+    docker run -v $(pwd)/default.conf:/etc/nginx/conf.d/default.conf:ro -p 8888:80 -d nginx
+    ```
+
+1. Open EXTERNAL_ENDPOINT in browser
