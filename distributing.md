@@ -31,40 +31,40 @@ After that the result graph is running inside a Docker container as before savin
 
 ## Mounting another web UI
 
-At all previous steps blazegraph server and web UI were used. However sometimes another web UI have to be integrated with the same graph data.
+At all previous steps Blazegraph server and web UI were used. However sometimes another web UI have to be integrated with the same graph data.
 
-Microservice architecture consisting of three containers allows to deploy blazegraph and generic graph UI ([Yasgui](https://triply.cc/docs/yasgui-api)) on a single machine, locally or in the cloud.
+Microservice architecture consisting of three containers allows to deploy Blazegraph and generic graph UI ([Yasgui](https://triply.cc/docs/yasgui-api)) on a single machine, locally or in the cloud.
 
 ### Using graph admin
 
-TBD
+To know how to use [graph-admin](https://github.com/elizusha/graph-loader) microservice functionality navigate to [Mounting another web UI](https://github.com/elizusha/graph-loader#mounting-another-web-ui) section.
 
 ### Manualy
 
-1. Run following command with external endpoint that will be used to open yasgui in browser
+1. Run following command with external endpoint that will be used to open Yasgui in browser
 
     ```
     EXTERNAL_ENDPOINT=127.0.0.1:8888
     ```
 
-1. Run blazegraph docker:
+1. Run Blazegraph docker:
 
     ```
     BLAZEGRAPH_CONTAINER_ID=`docker run -d lyrasis/blazegraph:2.1.5`
     ```
 
-1. Print blazegraph container ip:
+1. Print Blazegraph container ip:
 
     ```
     docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $BLAZEGRAPH_CONTAINER_ID
     ```
 
-1. Run yasgui docker:
+1. Run Yasgui docker:
 
     ```
     YASGUI_CONTAINER_ID=`docker run -d --env DEFAULT_SPARQL_ENDPOINT=http://${EXTERNAL_ENDPOINT}/blazegraph/bigdata/sparql erikap/yasgui`
     ```
-1. Print yasgui container ip:
+1. Print Yasgui container ip:
 
     ```
     docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $YASGUI_CONTAINER_ID
